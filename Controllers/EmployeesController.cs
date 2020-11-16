@@ -80,15 +80,13 @@ namespace ConsidTest.Controllers
 
             if (employee.Role.Equals(CEO))
             {
-                var Employees = db.Employees.ToList();
-                foreach (var EmployeeRole in Employees)
+                var result = db.Employees.FirstOrDefault(x => x.IsCEO == true);
+
+                if (result != null && (bool)(result.IsCEO = true))
                 {
-                    if (EmployeeRole.IsCEO == true)
-                    {
-                        ModelState.AddModelError(string.Empty, "There can be only one!");
-                        ViewBag.Role = GetViewBagForRoles(employee.Role);
-                        return View();
-                    }
+                    ModelState.AddModelError(string.Empty, "There can be only one!");
+                    ViewBag.Role = GetViewBagForRoles(employee.Role);
+                    return View();
                 }
             }
 
@@ -111,20 +109,12 @@ namespace ConsidTest.Controllers
             {
                 employee.IsCEO = false;
                 employee.IsManager = true;
-                employee.ManagerId = GenerateID();
             }
             else if (employee.Role.Equals(CEO))
             {
                 employee.IsCEO = true;
                 employee.IsManager = false;
             }
-        }
-
-        private int GenerateID()
-        {
-            Random random = new Random();
-            int i = random.Next();
-            return i;
         }
 
         public ActionResult EmployeeCreate(Employee employee)
@@ -135,21 +125,21 @@ namespace ConsidTest.Controllers
 
         private SelectList GetManagerViewBag()
         {
-            List<int?> Managers = new List<int?>();
+            List<int?> EmployeeId = new List<int?>();
             var Employees = db.Employees.ToList();
-            foreach (var Manager in Employees)
+            foreach (var Employee in Employees)
             {
-                if (Manager.IsManager == true)
+                if (Employee.IsManager == true && Employee.ManagerId.GetValueOrDefault(0) != 0)
                 {
-                    Managers.Add(Manager.ManagerId);
+                    EmployeeId.Add(Employee.Id);
                 }
             }
-            return new SelectList(Managers);
+            return new SelectList(EmployeeId);
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult EmployeeCreate([Bind(Include = "Id,FirstName,LastName,Salary,IsCEO,IsManager,ManagerId,ReportsTo,Role")] int? Rank, Employee employee)
+        public ActionResult EmployeeCreate([Bind(Include = "Id,FirstName,LastName,Salary,IsCEO,IsManager,ManagerId,Role")] int? Rank, Employee employee)
         {
             if (ModelState.IsValid)
             {
@@ -168,37 +158,13 @@ namespace ConsidTest.Controllers
                     ModelState.AddModelError(string.Empty, "Please choose rank");
                 }
 
-                if (employee.Role.Equals(CEO))
+                if (employee.Role.Equals(MANAGER))
                 {
-                    employee.ReportsTo = CEO;
+                    if (employee.ManagerId.GetValueOrDefault(0) == 0)
+                    {
+                        employee.ManagerId = employee.Id;
+                    }
                 }
-
-                //var result = (from Id in db.Employees
-                //              join ManagerId in db.Employees
-                //               on new { Id.Id, Id.ManagerId }
-                //               equals new { ManagerId.Id, ManagerId.ManagerId }
-                //              select new
-                //              {
-                //                  Id = Id.Id,
-                //                  ManagerId = Id.ManagerId,
-                //                  EmployeeRole = ManagerId.ReportsTo
-                //              }).ToList();
-
-                //foreach (var item in result)
-                //{
-                //    var s = item.EmployeeRole;
-
-                //    if (employee.Role.Equals(MANAGER))
-                //    {
-                //        employee.ReportsTo = s;
-
-                //    }
-                //}
-
-                //if (employee.Role.Equals(EMPLOYEE))
-                //{
-
-                //}
 
                 decimal CalculatedSalary = CalculateSalary.Calculate(employee, (int)Rank);
                 employee.Salary = CalculatedSalary;

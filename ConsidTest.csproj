@@ -174,7 +174,6 @@
       <DependentUpon>Model1.tt</DependentUpon>
     </Compile>
     <Compile Include="Utils\CalculateSalary.cs" />
-    <Compile Include="Utils\EmployeeEntityConfiguration.cs" />
     <Compile Include="Validators\BookValidator.cs" />
     <Compile Include="Validators\DigitalValidator.cs" />
     <Compile Include="Validators\EmployeeValidator.cs" />

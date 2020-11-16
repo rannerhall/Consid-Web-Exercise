@@ -11,7 +11,7 @@ namespace ConsidTest
 {
     using System;
     using System.Collections.Generic;
-    
+
     public partial class Employee
     {
         public int Id { get; set; }
@@ -23,5 +23,6 @@ namespace ConsidTest
         public Nullable<int> ManagerId { get; set; }
         public string Role { get; set; }
         public string ReportsTo { get; set; }
+
     }
 }
