@@ -166,6 +166,16 @@ namespace ConsidTest.Controllers
                     }
                 }
 
+                if (employee.Role.Equals(EMPLOYEE))
+                {
+                    if (employee.ManagerId.GetValueOrDefault(0) == 0)
+                    {
+                        ModelState.AddModelError(string.Empty, "Manager must be choosen");
+                        ViewBag.Manager = GetManagerViewBag();
+                        return View(employee);
+                    }
+                }
+
                 decimal CalculatedSalary = CalculateSalary.Calculate(employee, (int)Rank);
                 employee.Salary = CalculatedSalary;
 
